@@ -1,0 +1,8 @@
+[<%= $export %>]
+browsable = yes
+comment = <%= $comment %>
+path = <%= $path %>
+public = yes
+writable = yes
+inherit acls = yes
+

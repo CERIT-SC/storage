@@ -1,0 +1,3 @@
+class storage::config {
+
+}

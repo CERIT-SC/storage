@@ -1,0 +1,71 @@
+[global]
+   workgroup = UCN
+   realm = UCN.MUNI.CZ
+   preferred master = no
+   server string = UVT Samba Share
+   security = ADS
+   encrypt passwords = yes
+   log level = 0 auth:3
+   log file = /var/log/samba/log.%m
+   max log size = 5000
+   winbind enum users = no
+   winbind enum groups = no
+   winbind use default domain = Yes
+   winbind nested groups = yes
+   winbind expand groups = yes
+   winbind separator = +
+   idmap config * : range = <%= $idmap_range %>
+   <% if $idmap_backend != undef { -%>
+   idmap config * : backend = <%= $idmap_backend %>
+   <% } -%>
+   idmap cache time = 7200
+   template shell = /bin/bash
+   pid directory = /var/lock
+   clustering = yes
+   socket options = SO_RCVBUF=1048576 SO_SNDBUF=1048576 TCP_NODELAY
+   follow symlinks = yes
+   unix extensions = no
+   wide links = yes
+   unix charset = UTF8
+   keepalive = 120
+   max xmit = 65535
+   deadtime = 0
+   invalid users = root admin administrator
+   getwd cache = yes
+   wins support = no
+   domain master = no
+   kernel oplocks = no
+   level2 oplocks = yes
+   oplocks = yes
+   client ldap sasl wrapping = seal
+   netbios name = <%= $netbios_name %>
+   inherit acls                 = no
+   server signing               = enabled
+   template homedir             = <%= $homedir_tmpl %>
+   vfs objects = acl_xattr 
+   obey pam restrictions        = yes
+   load printers = no
+   printing = bsd
+   printcap name = /dev/null
+   disable spoolss = yes
+   restrict anonymous = 2
+   
+[<%= $sharename %>]
+   comment=Home Directories
+   path=<%= $sharepath %>
+   browseable = no
+   read only = no
+   create mask = 0640
+   directory mask = 2750
+   guest ok = no
+   <% if $trash != undef and length($trash) > 0 { -%>
+vfs objects = recycle
+   recycle:repository = <%= $sharepath %>/<%= $trash %>
+   recycle:exclude_dir = <%= $sharepath %>/<%= $trash %>,<%= $trash %>
+   recycle:keeptree = no
+   recycle:versions = yes
+   <% } -%>
+
+<% if $custom_shares != undef and length($custom_shares) > 0 { -%>
+<%= $custom_shares %>
+<% } -%>

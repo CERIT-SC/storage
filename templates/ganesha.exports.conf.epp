@@ -1,0 +1,24 @@
+EXPORT
+{
+        Attr_Expiration_Time=60;
+        Delegations=none;
+        Export_id=<%= $fsid %>;
+        Filesystem_id=666.666;
+        MaxOffsetRead=18446744073709551615;
+        MaxOffsetWrite=18446744073709551615;
+        MaxRead=1048576;
+        MaxWrite=1048576;
+        Path="<%= $export %>";
+        PrefRead=1048576;
+        PrefReaddir=1048576;
+        PrefWrite=1048576;
+        Pseudo="<%= $pseudo %>";
+        Tag="<%= $export %>";
+        UseCookieVerifier=false;
+        FSAL
+        {
+                Name=gpfs;
+        }
+<%= $clients %>
+}
+

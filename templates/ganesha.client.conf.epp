@@ -1,0 +1,13 @@
+        CLIENT
+        {
+<% if $access != undef { -%>
+Access_Type=<%= $access %>;
+<% } -%> 
+Clients=<%= $client %>;
+<% if $sectype != undef { -%>
+SecType="<%= $sectype %>";
+<% } -%>
+<% if $squash != undef { -%>
+Squash=<%= $squash %>;
+<% } -%>
+        }
