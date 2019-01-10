@@ -1,6 +1,6 @@
 class storage::ssh::config(
    Optional[String] $chroot        = $storage::params::ssh_chroot,
-   Optional[String] $ha_ipaddress,
+   Optional[String] $ha_ipaddress  = undef,
 ) inherits storage::params {
 
   ssh::server::config::match {'MatchRoot':
