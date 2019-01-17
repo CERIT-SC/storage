@@ -6,12 +6,13 @@ class storage::gpfs::ces (
   Optional[Hash]        $nfs_exports,
   Optional[Boolean]     $enable_smb,
   Optional[String]      $idmap_switch,
-  String                $idmap_cfg = $storage::params::nfs_idmap_cfg,
-  Variant[String,Array] $idmap_service = $storage::params::nfs_idmap_service,
-  Optional[String]      $nfs_export_tmp_file = $storage::params::nfs_export_tmp_file, 
+  String                $idmap_cfg               = $storage::params::nfs_idmap_cfg,
+  Variant[String,Array] $idmap_service           = $storage::params::nfs_idmap_service,
+  Optional[String]      $nfs_export_tmp_file     = $storage::params::nfs_export_tmp_file, 
   Optional[Hash]        $smb_global_options,
   Optional[Hash]        $smb_exports,
-  Optional[String]      $smb_export_tmp_file = $storage::params::smb_export_tmp_file,
+  Optional[String]      $smb_export_tmp_file     = $storage::params::smb_export_tmp_file,
+  String                $user_authentication     = $storage::params::ces_user_authentication,
 ) inherits storage::params {
 
   if $nodes != undef and $nodes.size > 0 {
@@ -33,9 +34,9 @@ class storage::gpfs::ces (
   }
 
   exec { 'gpfs_ces_authentication':
-    command => 'mmuserauth service create --data-access-method file --type userdefined',
+    command => $ces_user_authentication, 
     path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin', '/usr/lpp/mmfs/bin'],
-    unless  => 'mmuserauth service list | grep -q "FILE access configuration.*USERDEFINED"',
+    unless  => 'mmuserauth service list | grep -q "FILE access configuration.*"',
   }
   
   if $enable_nfs {

@@ -36,19 +36,20 @@ class storage::params {
            $nfs_conf = '/etc/sysconfig/nfs'
        }
     }
-    $nfs_idmap_cfg          = '/etc/idmapd.conf'
-    $nfs_idmap_domain       = undef
-    $nfs_idmap_realms       = ''
-    $nfs_idmap_switch       = 'nsswitch'
-    $nfs_idmap_service      = 'rpcidmapd'
+    $nfs_idmap_cfg           = '/etc/idmapd.conf'
+    $nfs_idmap_domain        = undef
+    $nfs_idmap_realms        = ''
+    $nfs_idmap_switch        = 'nsswitch'
+    $nfs_idmap_service       = 'rpcidmapd'
   
-    $nfs_rpcbind_cfg        = '/etc/sysconfig/rpcbind'
-    $nfs_rpcbind_optname    = 'RPCBIND_ARGS'
-    $nfs_rpcbind_optval     = '-h 127.0.0.1'
+    $nfs_rpcbind_cfg         = '/etc/sysconfig/rpcbind'
+    $nfs_rpcbind_optname     = 'RPCBIND_ARGS'
+    $nfs_rpcbind_optval      = '-h 127.0.0.1'
 
-    $gpfs_enabled           = false
+    $gpfs_enabled            = false
 
 
-    $nfs_export_tmp_file    = '/var/tmp/gpfs_exports_nfs.cfg'
-    $smb_export_tmp_file    = '/var/tmp/gpfs_exports_smb.cfg'
+    $nfs_export_tmp_file     = '/var/tmp/gpfs_exports_nfs.cfg'
+    $smb_export_tmp_file     = '/var/tmp/gpfs_exports_smb.cfg'
+    $ces_user_authentication = 'mmuserauth service create --data-access-method file --type userdefined' 
 }
