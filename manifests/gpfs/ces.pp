@@ -13,6 +13,7 @@ class storage::gpfs::ces (
   Optional[Hash]        $smb_exports,
   Optional[String]      $smb_export_tmp_file     = $storage::params::smb_export_tmp_file,
   String                $user_authentication     = $storage::params::ces_user_authentication,
+  Optional[String]      $ldap_password           = undef,
 ) inherits storage::params {
 
   if $nodes != undef and $nodes.size > 0 {
@@ -31,6 +32,14 @@ class storage::gpfs::ces (
           }
        }
      }
+  }
+
+  if $ldap_password != undef {
+    file { 'ldap_password':
+      path => '/var/mmfs/ssl/keyServ/tmp/ldap',
+      mode => '0600',
+      content => "%fileauth:\npassword=${ldap_password}\n",
+    }
   }
 
   exec { 'gpfs_ces_authentication':
@@ -110,6 +119,12 @@ class storage::gpfs::ces (
        command => "mmces service enable SMB",
        path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin', '/usr/lpp/mmfs/bin'],
        unless  => "mmces service list | grep -q SMB",
+     }
+
+     exec { "gpfs_ces_start":
+       command => "mmces service start smb",
+       path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin', '/usr/lpp/mmfs/bin'],
+       unless  => 'mmces service list | grep -q "SMB is running"',
      }
      
      if $smb_global_options != undef {
