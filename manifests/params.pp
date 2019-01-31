@@ -52,4 +52,8 @@ class storage::params {
     $nfs_export_tmp_file     = '/var/tmp/gpfs_exports_nfs.cfg'
     $smb_export_tmp_file     = '/var/tmp/gpfs_exports_smb.cfg'
     $ces_user_authentication = 'mmuserauth service create --data-access-method file --type userdefined' 
+ 
+    $chroot_libdir           = '/lib64'
+    $chroot_devfiles         = ['null', 'zero']
+    $chroot_etcfiles         = ['profile.d', 'bashrc', 'host.conf', 'hosts', 'issue', 'krb5.conf', 'nsswitch.conf', 'profile', 'protocols', 'resolv.conf', 'services', 'vimrc']
 }
