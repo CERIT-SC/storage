@@ -1,13 +1,13 @@
 class storage::cifs::install {
     case $::operatingsystem {
        'Debian': {
-           $packages = ['samba', 'ctdb', 'winbind', 'libpam-script']
+           $packages = ['samba', 'ctdb', 'winbind']
         }
        'CentOS': {
-           $packages = ['samba-winbind-clients', 'samba', 'ctdb', 'samba-winbind-modules', 'pam_script']
+           $packages = ['samba-winbind-clients', 'samba', 'ctdb', 'samba-winbind-modules']
        }
     }
     package{ $packages:
-       ensure => latest
+       ensure => $storage::cifs::config::samba_version
     }
 }

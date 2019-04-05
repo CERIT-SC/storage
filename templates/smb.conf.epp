@@ -1,24 +1,34 @@
 [global]
-   workgroup = UCN
-   realm = UCN.MUNI.CZ
+   workgroup = <%= $workgroup %>
+   realm = <%= $realm %>
    preferred master = no
-   server string = UVT Samba Share
-   security = ADS
+   server string = <%= $server_string %>
+   security = <%= $security %>
    encrypt passwords = yes
-   log level = 0 auth:3
-   log file = /var/log/samba/log.%m
-   max log size = 5000
+   log level = <%= $loglevel %>
+   log file = <%= $logfile %>
+   max log size = <%= $logsize %>
+<% if $enum_users == true { -%>
+   winbind enum users = yes
+<% } -%>
+<% if $enum_users == false { -%>
    winbind enum users = no
+<% } -%>
+<% if $enum_users == true { -%>
+   winbind enum groups = yes
+<% } -%>
+<% if $enum_users == false { -%>
    winbind enum groups = no
+<% } -%>
    winbind use default domain = Yes
    winbind nested groups = yes
    winbind expand groups = yes
    winbind separator = +
    idmap config * : range = <%= $idmap_range %>
-   <% if $idmap_backend != undef { -%>
+<% if $idmap_backend != undef { -%>
    idmap config * : backend = <%= $idmap_backend %>
-   <% } -%>
-   idmap cache time = 7200
+<% } -%>
+   idmap cache time = <%= $idmap_cache_time %>
    template shell = /bin/bash
    pid directory = /var/lock
    clustering = yes
@@ -58,13 +68,22 @@
    create mask = 0640
    directory mask = 2750
    guest ok = no
-   <% if $trash != undef and length($trash) > 0 { -%>
-vfs objects = recycle
+<% if $preexec != undef and length($preexec) > 0 { -%>
+   preexec = <%= $preexec %>
+<% } -%>
+<% if $trash != undef and length($trash) > 0 { -%>
+   vfs objects = recycle
+<% if $trash[0] == '/' { -%>
+   recycle:repository = <%= $trash %>
+   recycle:exclude_dir = <%= $trash %>
+<% } -%>
+<% if $trash[0] != '/' { -%>
    recycle:repository = <%= $sharepath %>/<%= $trash %>
    recycle:exclude_dir = <%= $sharepath %>/<%= $trash %>,<%= $trash %>
+<% } -%>
    recycle:keeptree = no
    recycle:versions = yes
-   <% } -%>
+<% } -%>
 
 <% if $custom_shares != undef and length($custom_shares) > 0 { -%>
 <%= $custom_shares %>

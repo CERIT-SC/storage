@@ -51,9 +51,23 @@ class storage::params {
 
     $nfs_export_tmp_file     = '/var/tmp/gpfs_exports_nfs.cfg'
     $smb_export_tmp_file     = '/var/tmp/gpfs_exports_smb.cfg'
-    $ces_user_authentication = 'mmuserauth service create --data-access-method file --type userdefined' 
+    if $::fqdn !~ /hsm[1-8]/ {
+        $ces_user_authentication = 'mmuserauth service create --data-access-method file --type userdefined' 
+    }
  
     $chroot_libdir           = '/lib64'
     $chroot_devfiles         = ['null', 'zero']
     $chroot_etcfiles         = ['profile.d', 'bashrc', 'host.conf', 'hosts', 'issue', 'krb5.conf', 'nsswitch.conf', 'profile', 'protocols', 'resolv.conf', 'services', 'vimrc']
+    $cifs_workgroup          = 'UCN'
+    $cifs_realm              = 'UCN.MUNI.CZ'
+    $cifs_server_string      = 'UVT Samba Share'
+    $cifs_security           = 'ADS'
+    $cifs_loglevel           = '0 auth:3'
+    $cifs_logfile            = '/var/log/samba/log.%m'
+    $cifs_logsize            = 5000
+    $cifs_enum_users         = false
+    $cifs_enum_groups        = false
+    $cifs_idmap_cache_time   = 7200
+    $cifs_preexec            = undef
+    $cifs_samba_version      = 'latest'
 }

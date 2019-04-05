@@ -12,7 +12,7 @@ class storage::gpfs::ces (
   Optional[Hash]        $smb_global_options,
   Optional[Hash]        $smb_exports,
   Optional[String]      $smb_export_tmp_file     = $storage::params::smb_export_tmp_file,
-  String                $user_authentication     = $storage::params::ces_user_authentication,
+  String                $ces_user_authentication = $storage::params::ces_user_authentication,
   Optional[String]      $ldap_password           = undef,
 ) inherits storage::params {
 

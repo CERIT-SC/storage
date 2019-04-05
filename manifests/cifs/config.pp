@@ -16,19 +16,40 @@ class storage::cifs::config (
     Integer $ctdb_nrfiles           = $storage::params::cifs_ctdb_nrfiles,
     String $idmap_range             = $storage::params::cifs_smb_idmap_range,
     Optional[String] $idmap_backend = $storage::params::cifs_smb_idmap_backend,
-    String $ctdb_haaddr             = '',
     Optional[String] $bindiface     = '',
+    String $workgroup               = $storage::params::cifs_workgroup,
+    String $realm                   = $storage::params::cifs_realm,
+    String $server_string           = $storage::params::cifs_server_string,
+    String $security                = $storage::params::cifs_security,
+    String $cifs_loglevel           = $storage::params::cifs_loglevel,
+    String $logfile                 = $storage::params::cifs_logfile,
+    Integer $logsize                = $storage::params::cifs_logsize,
+    Boolean $enum_users             = $storage::params::cifs_enum_users,
+    Boolean $enum_groups            = $storage::params::cifs_enum_groups,
+    Integer $idmap_cache_time       = $storage::params::cifs_idmap_cache_time,
+    Optional[String] $preexec       = $storage::params::cifs_preexec,
+    String $samba_version           = $storage::params::cifs_samba_version,
 ) inherits storage::params {
-   
     $params = {
-       'netbios_name'  => $netbiosname,
-       'homedir_tmpl'  => $homedir_tmpl,
-       'sharename'     => $sharename,
-       'sharepath'     => $sharepath,
-       'trash'         => $trash,
-       'custom_shares' => $custom_shares,
-       'idmap_range'   => $idmap_range,
-       'idmap_backend' => $idmap_backend,
+       'netbios_name'     => $netbiosname,
+       'homedir_tmpl'     => $homedir_tmpl,
+       'sharename'        => $sharename,
+       'sharepath'        => $sharepath,
+       'trash'            => $trash,
+       'custom_shares'    => $custom_shares,
+       'idmap_range'      => $idmap_range,
+       'idmap_backend'    => $idmap_backend,
+       'workgroup'        => $workgroup,
+       'realm'            => $realm,
+       'server_string'    => $server_string,
+       'security'         => $security,
+       'loglevel'         => $cifs_loglevel,
+       'logfile'          => $logfile,
+       'logsize'          => $logsize,
+       'enum_users'       => $enum_users,
+       'enum_groups'      => $enum_groups,
+       'idmap_cache_time' => $idmap_cache_time,
+       'preexec'          => $preexec,
     }
 
     file {$smb_conf:
@@ -123,14 +144,16 @@ class storage::cifs::config (
             require => Package['samba-winbind-modules'], 
          }
 
-         pam {'pam_script':
-            ensure    => present,
-            service   => 'password-auth',
-            type      => 'session',
-            control   => 'required',
-            module    => 'pam_script.so',
-            arguments => 'dir=/etc/pam-script.d/',
-            position  => 'before module pam_systemd.so',
+         file{'pam_ses_open':
+            ensure => link,
+            path   => '/etc/pam-script.d/pam_script_ses_open',
+            target => '/usr/bin/true',
+         }
+
+         file{'pam_ses_close':
+            ensure => link,
+            path   => '/etc/pam-script.d/pam_script_ses_close',
+            target => '/usr/bin/true',
          }
 
          pam {'password-auth':
@@ -146,15 +169,6 @@ class storage::cifs::config (
             type      => 'session',
             control   => 'required',
             module    => 'pam_limits.so',
-         }
-         pam {'pam_script_samba':
-            ensure    => present,
-            service   => 'samba',
-            type      => 'session',
-            control   => 'required',
-            module    => 'pam_script.so',
-            arguments => 'dir=/etc/pam-script.d/',
-            position  => 'after module pam_limits.so',
          }
          pam {'pam_winbind':
             ensure    => present,
@@ -179,5 +193,60 @@ class storage::cifs::config (
             }
          }
        }
+    }
+
+    # pacemaker
+
+    if $storage::pcmk_enabled {
+      require storage::pcmk::config
+      if $storage::ctdb_haaddr =~ /\// {
+         $_net = split($storage::ctdb_haaddr, '/')
+         $_cifs_addr = $_net[0]
+         $_cifs_mask = $_net[1]
+      } else {
+         $_cifs_addr = $storage::ctdb_haaddr
+         $_cifs_mask = '24'
+      }
+
+      if $storage::ctdb_haaddr == $storage::nfs_haaddr {
+        storage::pcmk::resource{'CIFS':
+          primitive_class => 'systemd',
+          primitive_type  => 'ctdb',
+          operations      => {
+             'monitor'    => {'interval' => '120s', 'timeout' => '60s', 'start-delay' => '30', 'on-fail' => 'restart' },
+             'start'      => {'interval' => '0', 'timeout' => '60s', 'on-fail' => 'restart' },
+             'stop'       => {'interval' => '0', 'timeout' => '300s' },
+          },
+          clone           => true,
+        }
+
+        if ! defined(Storage::Pcmk::Resource['CIFSNFS-ip']) {
+          storage::pcmk::resource{'CIFSNFS-ip':
+            present         => true,
+            primitive_class => 'ocf',
+            primitive_type  => 'IPaddr2',
+            provider        => 'heartbeat',
+            parameters      => { 'ip' => $_cifs_addr, 'cidr_netmask' => $_cifs_mask },
+            operations      => {
+              'monitor' => { 'interval' => '10s', 'timeout' => '30s', 'on-fail' => 'restart' },
+              'start'   => { 'interval' => '0', 'timeout' => '60s', 'on-fail' => 'restart' },
+            },
+            require         => Cs_primitive['CIFS'],
+          }
+        }
+      } else {
+        storage::pcmk::resource{'CIFS':
+          primitive_class => 'systemd',
+          primitive_type  => 'ctdb',
+          operations      => {
+             'monitor'    => {'interval' => '120s', 'timeout' => '60s', 'start-delay' => '30', 'on-fail' => 'restart' },
+             'start'      => {'interval' => '0', 'timeout' => '60s', 'on-fail' => 'restart' },
+             'stop'       => {'interval' => '0', 'timeout' => '300s' },
+          },
+          clone           => true,
+          ip              => $_cifs_addr,
+          netmask         => $_cifs_mask,
+        }
+      }
     }
 }

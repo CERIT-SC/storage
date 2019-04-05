@@ -5,7 +5,7 @@ Access_Type=<%= $access %>;
 <% } -%> 
 Clients=<%= $client %>;
 <% if $sectype != undef { -%>
-SecType="<%= $sectype %>";
+SecType=<%= $sectype %>;
 <% } -%>
 <% if $squash != undef { -%>
 Squash=<%= $squash %>;
